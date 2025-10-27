@@ -34,15 +34,3 @@ migrate-reset:
 .PHONY: shift-migrations
 shift-migrations:
 	@./scripts/shiftmigrations.sh $(filter-out $@,$(MAKECMDGOALS))
-
-.PHONY: seed-run
-seed: 
-	@echo "Seeding database"
-	@go run cmd/migrate/seed/main.go
-
-.PHONY: seed-reset
-seed-reset:
-	@echo "Resetting and seeding database"
-	@$(MIGRATE_COMMAND) drop
-	@$(MIGRATE_COMMAND) up
-	@go run cmd/migrate/seed/main.go
