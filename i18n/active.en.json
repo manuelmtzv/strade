@@ -1,0 +1,15 @@
+{
+  "Error.InternalServerError": "Internal server error",
+  "Error.NotFound": "Not found",
+  "Error.Unauthorized": "Unauthorized",
+  "Error.Forbidden": "Action not allowed",
+  "Error.BadRequest": "Bad request",
+  "Error.Conflict": "Conflict during request",
+  "Error.ValidationError": "Validation error",
+  "Error.InvalidToken": "Invalid token",
+  "Error.InvalidCredentials": "Invalid credentials",
+  "Error.InvalidEmail": "Invalid email",
+  "Error.InvalidPassword": "Invalid password",
+  "Error.RateLimitExeeded": "Rate limit exceeded. Retry after {{.RetryAfter}}",
+  "Error.InvalidUUID": "The identifier must be a valid UUID"
+}

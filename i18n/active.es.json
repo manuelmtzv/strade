@@ -1,0 +1,15 @@
+{
+  "Error.InternalServerError": "Error interno del servidor",
+  "Error.NotFound": "No encontrado",
+  "Error.Unauthorized": "No autorizado",
+  "Error.Forbidden": "Acción no permitida",
+  "Error.BadRequest": "Solicitud incorrecta",
+  "Error.Conflict": "Conflicto durante la solicitud",
+  "Error.ValidationError": "Error de validación",
+  "Error.InvalidToken": "Token inválido",
+  "Error.InvalidCredentials": "Credenciales inválidas",
+  "Error.InvalidEmail": "Email inválido",
+  "Error.InvalidPassword": "Contraseña inválida",
+  "Error.RateLimitExeeded": "Límite de tasa excedido. Inténtalo de nuevo después de {{.RetryAfter}}",
+  "Error.InvalidUUID": "El identificador debe ser un UUID válido"
+}

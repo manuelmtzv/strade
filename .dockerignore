@@ -1,0 +1,6 @@
+bin
+*.log
+*.test
+*.local
+node_modules
+Dockerfile.*

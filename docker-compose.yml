@@ -1,0 +1,19 @@
+services: 
+  db: 
+    image: postgres:16-bullseye
+    container_name: strade-db
+    env_file:
+      - ./server/.env
+    ports:
+      - "5432:5432"
+    volumes:
+      - db-data:/var/lib/postgresql/data
+  redis: 
+    image: redis:7.4.1
+    container_name: strade-redis
+    ports:
+      - "6379:6379"
+    command: redis-server --save 60 1 --loglevel warning
+
+volumes: 
+  db-data:
