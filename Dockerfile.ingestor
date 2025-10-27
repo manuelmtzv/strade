@@ -9,7 +9,7 @@ RUN go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate
 
 COPY . .
 
-RUN CGO_ENABLED=0 GOOS=linux go build -o /app/main ./cmd/crawler
+RUN CGO_ENABLED=0 GOOS=linux go build -o /app/main ./cmd/ingestor
 
 EXPOSE 8081
 
