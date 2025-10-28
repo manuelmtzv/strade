@@ -9,3 +9,5 @@ COMMENT ON COLUMN cities.name IS 'City name';
 
 CREATE INDEX idx_cities_name ON cities(name);
 CREATE INDEX idx_cities_slug ON cities(slug);
+
+INSERT INTO cities (id, name, slug) VALUES ('000', 'Sin ciudad', 'sin-ciudad');

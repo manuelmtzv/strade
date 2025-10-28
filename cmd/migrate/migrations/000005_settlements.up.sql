@@ -10,7 +10,8 @@ CREATE TABLE settlements (
     office_postal_code CHAR(5),                     
     zone VARCHAR(10),                               
     latitude DOUBLE PRECISION,                      
-    longitude DOUBLE PRECISION                      
+    longitude DOUBLE PRECISION,
+    CONSTRAINT settlements_postal_code_name_municipality_key UNIQUE (postal_code, name, municipality_id)
 );
 
 COMMENT ON COLUMN settlements.id IS 'Unique identifier for settlement';
