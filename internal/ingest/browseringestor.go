@@ -166,7 +166,7 @@ func (s *BrowserIngestor) transformAndStore(ctx context.Context, rows []models.R
 	s.logger.Infof("Extracted: %d states, %d settlement types, %d municipalities, %d cities",
 		len(states), len(settlementTypes), len(municipalities), len(cities))
 
-	err := utils.WithTx(ctx, s.store.DB, func(tx *sql.Tx) error {
+	if err := (utils.WithTx(ctx, s.store.DB, func(tx *sql.Tx) error {
 		if err := s.store.StateStore.BulkUpsertTx(ctx, tx, states); err != nil {
 			return err
 		}
@@ -183,19 +183,11 @@ func (s *BrowserIngestor) transformAndStore(ctx context.Context, rows []models.R
 			return err
 		}
 
-		return nil
-	})
-	if err != nil {
-		return err
-	}
+		settlements := s.transformToSettlements(rows)
+		s.logger.Infof("Transformed %d settlements", len(settlements))
 
-	settlements := s.transformToSettlements(rows)
-	s.logger.Infof("Transformed %d settlements", len(settlements))
-
-	err = utils.WithTx(ctx, s.store.DB, func(tx *sql.Tx) error {
 		return s.store.SettlementStore.BulkUpsertTx(ctx, tx, settlements)
-	})
-	if err != nil {
+	})); err != nil {
 		return err
 	}
 
