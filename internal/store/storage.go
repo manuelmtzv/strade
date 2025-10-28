@@ -9,6 +9,7 @@ type Storage struct {
 	CityStore           CityStorage
 	SettlementTypeStore SettlementTypeStorage
 	SettlementStore     SettlementStorage
+	WatermarkStore      *WatermarkStore
 }
 
 func NewStorage(db *sql.DB) Storage {
@@ -19,5 +20,6 @@ func NewStorage(db *sql.DB) Storage {
 		CityStore:           NewCityStore(db),
 		SettlementTypeStore: NewSettlementTypeStore(db),
 		SettlementStore:     NewSettlementStore(db),
+		WatermarkStore:      NewWatermarkStore(db),
 	}
 }
