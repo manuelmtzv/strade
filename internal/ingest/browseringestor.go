@@ -35,25 +35,41 @@ func NewBrowserIngestor(logger *zap.SugaredLogger, store store.Storage, sourceUR
 }
 
 func (s *BrowserIngestor) Ingest(ctx context.Context) error {
+	start := time.Now()
+
+	t0 := time.Now()
 	data, err := s.getData(ctx)
 	if err != nil {
 		return err
 	}
+	getDataDuration := time.Since(t0)
 
+	t1 := time.Now()
 	rows, err := s.parseData(data)
 	if err != nil {
 		return err
 	}
+	parseDataDuration := time.Since(t1)
 
 	s.logger.Infof("Parsed %d raw records", len(rows))
 
+	t2 := time.Now()
 	if err := s.transformAndStore(ctx, rows); err != nil {
 		return err
 	}
+	transformAndStoreDuration := time.Since(t2)
 
+	t3 := time.Now()
 	if err := s.cleanup(); err != nil {
 		return err
 	}
+	cleanupDuration := time.Since(t3)
+
+	s.logger.Infof("Data ingestion completed in %s", time.Since(start))
+	s.logger.Infof("  getData: %s", getDataDuration)
+	s.logger.Infof("  parseData: %s", parseDataDuration)
+	s.logger.Infof("  transformAndStore: %s", transformAndStoreDuration)
+	s.logger.Infof("  cleanup: %s", cleanupDuration)
 
 	return nil
 }
@@ -268,7 +284,7 @@ func (s *BrowserIngestor) extractCities(rows []models.RawDataRecord) []*models.C
 		if cityCode == "" {
 			continue
 		}
-		
+
 		if _, exists := cityMap[cityCode]; !exists {
 			cityName := row.City
 			if cityName == "" {
