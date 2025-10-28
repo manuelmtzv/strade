@@ -7,10 +7,12 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"strade/internal/config"
 	"strade/internal/models"
 	"strade/internal/store"
 	"strade/internal/utils"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/go-rod/rod"
@@ -21,16 +23,16 @@ import (
 )
 
 type BrowserIngestor struct {
-	logger    *zap.SugaredLogger
-	store     store.Storage
-	sourceURL string
+	config config.IngestorConfig
+	logger *zap.SugaredLogger
+	store  store.Storage
 }
 
-func NewBrowserIngestor(logger *zap.SugaredLogger, store store.Storage, sourceURL string) *BrowserIngestor {
+func NewBrowserIngestor(config config.IngestorConfig, logger *zap.SugaredLogger, store store.Storage) *BrowserIngestor {
 	return &BrowserIngestor{
-		logger:    logger,
-		store:     store,
-		sourceURL: sourceURL,
+		config: config,
+		logger: logger,
+		store:  store,
 	}
 }
 
@@ -78,7 +80,7 @@ func (s *BrowserIngestor) getData(ctx context.Context) ([]byte, error) {
 	browser := rod.New().Context(ctx).MustConnect()
 	defer browser.MustClose()
 
-	page := browser.MustPage(s.sourceURL)
+	page := browser.MustPage(s.config.SourceURL)
 	page.MustWaitLoad()
 
 	page.MustElement("#rblTipo_1").MustClick()
@@ -183,11 +185,15 @@ func (s *BrowserIngestor) transformAndStore(ctx context.Context, rows []models.R
 			return err
 		}
 
-		settlements := s.transformToSettlements(rows)
-		s.logger.Infof("Transformed %d settlements", len(settlements))
-
-		return s.store.SettlementStore.BulkUpsertTx(ctx, tx, settlements)
+		return nil
 	})); err != nil {
+		return err
+	}
+
+	settlements := s.transformToSettlements(rows)
+	s.logger.Infof("Transformed %d settlements", len(settlements))
+
+	if err := s.bulkUpsertSettlementsWithWorkers(ctx, settlements); err != nil {
 		return err
 	}
 
@@ -334,6 +340,54 @@ func (s *BrowserIngestor) transformToSettlements(rows []models.RawDataRecord) []
 	}
 
 	return settlements
+}
+
+func chunkSettlements(settlements []*models.Settlement, batchSize int) [][]*models.Settlement {
+	var chunks [][]*models.Settlement
+	for i := 0; i < len(settlements); i += batchSize {
+		end := min(i+batchSize, len(settlements))
+		chunks = append(chunks, settlements[i:end])
+	}
+	return chunks
+}
+
+func (s *BrowserIngestor) bulkUpsertSettlementsWithWorkers(ctx context.Context, settlements []*models.Settlement) error {
+	batchSize := s.config.SettlementsBatchSize
+	numWorkers := s.config.SettlementsWorkers
+
+	batches := chunkSettlements(settlements, batchSize)
+
+	var wg sync.WaitGroup
+	errChan := make(chan error, len(batches))
+
+	semaphore := make(chan struct{}, numWorkers)
+
+	for _, batch := range batches {
+		wg.Add(1)
+		go func(b []*models.Settlement) {
+			defer wg.Done()
+			semaphore <- struct{}{}
+			defer func() { <-semaphore }()
+
+			err := utils.WithTx(ctx, s.store.DB, func(tx *sql.Tx) error {
+				return s.store.SettlementStore.BulkUpsertTx(ctx, tx, b)
+			})
+			if err != nil {
+				errChan <- err
+			}
+		}(batch)
+	}
+
+	wg.Wait()
+	close(errChan)
+
+	for err := range errChan {
+		if err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
 func (s *BrowserIngestor) cleanup() error {

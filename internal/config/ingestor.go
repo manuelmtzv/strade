@@ -1,6 +1,8 @@
 package config
 
 type IngestorConfig struct {
-	SourceURL string
-	DB        DBConfig
+	SourceURL            string
+	SettlementsBatchSize int
+	SettlementsWorkers   int
+	DB                   DBConfig
 }

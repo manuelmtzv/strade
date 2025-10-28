@@ -39,7 +39,7 @@ func main() {
 
 	storage := store.NewStorage(dbConn)
 
-	browserIngestor := ingest.NewBrowserIngestor(logger, storage, cfg.SourceURL)
+	browserIngestor := ingest.NewIngestor(cfg, logger, storage, "browser")
 
 	ctx := context.Background()
 
