@@ -7,7 +7,6 @@ import (
 	"os"
 	"os/signal"
 	"strade/internal/config"
-	"sync"
 	"syscall"
 	"time"
 
@@ -17,7 +16,6 @@ import (
 type Application struct {
 	Config config.APIConfig
 	Router http.Handler
-	Wg     sync.WaitGroup
 	Logger *zap.SugaredLogger
 }
 
@@ -41,29 +39,19 @@ func (app *Application) ServeHTTP() error {
 		IdleTimeout:  time.Minute,
 	}
 
-	shutdownErrorStream := make(chan error)
+	shutdownErr := make(chan error, 1)
 
 	go func() {
 		quit := make(chan os.Signal, 1)
 		signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
 
 		s := <-quit
-
 		app.Logger.Infof("received signal: %s, shutting down server...", s)
 
-		ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
+		ctx, cancel := context.WithTimeout(context.Background(), app.Config.ShutdownTimeout)
 		defer cancel()
 
-		err := server.Shutdown(ctx)
-		if err != nil {
-			shutdownErrorStream <- err
-			return
-		}
-
-		app.Logger.Infow("completing background tasks", "addr", app.Config.Addr)
-
-		app.Wg.Wait()
-		shutdownErrorStream <- nil
+		shutdownErr <- server.Shutdown(ctx)
 	}()
 
 	app.Logger.Infow("starting server", "addr", app.Config.Addr)
@@ -73,12 +61,10 @@ func (app *Application) ServeHTTP() error {
 		return err
 	}
 
-	err = <-shutdownErrorStream
-	if err != nil {
+	if err := <-shutdownErr; err != nil {
 		return err
 	}
 
 	app.Logger.Infow("stopped server", "addr", app.Config.Addr)
-
 	return nil
 }

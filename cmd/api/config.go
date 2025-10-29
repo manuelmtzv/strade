@@ -3,11 +3,13 @@ package main
 import (
 	"strade/internal/config"
 	"strade/internal/env"
+	"time"
 )
 
 func getConfig() config.APIConfig {
 	return config.APIConfig{
-		Addr: env.GetString("ADDR", ":8080"),
+		Addr:            env.GetString("ADDR", ":8080"),
+		ShutdownTimeout: env.GetDuration("SHUTDOWN_TIMEOUT", 10*time.Second),
 		DB: config.DBConfig{
 			Addr:         env.GetString("DB_ADDR", ""),
 			MaxOpenConns: env.GetInt("DB_MAX_OPEN_CONNS", 25),

@@ -78,5 +78,7 @@ func main() {
 	app.SetRouter(api.NewRouter(handler, bundle))
 
 	logger.Infow("Starting server", "port", cfg.Addr)
-	logger.Fatal(app.ServeHTTP())
+	if err := app.ServeHTTP(); err != nil {
+		logger.Fatal(err)
+	}
 }

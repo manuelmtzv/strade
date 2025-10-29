@@ -1,7 +1,10 @@
 package config
 
+import "time"
+
 type APIConfig struct {
-	Addr  string
-	DB    DBConfig
-	Cache CacheConfig
+	Addr            string
+	ShutdownTimeout time.Duration
+	DB              DBConfig
+	Cache           CacheConfig
 }
