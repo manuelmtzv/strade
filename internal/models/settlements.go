@@ -11,13 +11,13 @@ type Settlement struct {
 	PostalCode       string          `json:"postalCode"`
 	Name             string          `json:"name"`
 	Slug             string          `json:"slug"`
-	SettlementTypeID string          `json:"settlementTypeId"`
+	SettlementTypeID string          `json:"settlementTypeId,omitempty"`
 	SettlementType   *SettlementType `json:"settlementType"`
-	MunicipalityID   string          `json:"municipalityId"`
+	MunicipalityID   string          `json:"municipalityId,omitempty"`
 	Municipality     *Municipality   `json:"municipality"`
-	CityID           string          `json:"cityId"`
+	CityID           string          `json:"cityId,omitempty"`
 	City             *City           `json:"city"`
-	StateID          string          `json:"stateId"`
+	StateID          string          `json:"stateId,omitempty"`
 	State            *State          `json:"state"`
 	OfficePostalCode string          `json:"officePostalCode"`
 	Zone             string          `json:"zone"`

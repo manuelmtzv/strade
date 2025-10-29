@@ -20,10 +20,11 @@ func (t *Transporter) ReadJSON(w http.ResponseWriter, r *http.Request, data any)
 	return decoder.Decode(data)
 }
 
-func (t *Transporter) WriteJSONError(w http.ResponseWriter, status int, message string) error {
+func (t *Transporter) WriteJSONError(w http.ResponseWriter, status int, message string, errorCode string) error {
 	type envelope struct {
-		Error string `json:"error"`
+		Error     string `json:"error"`
+		ErrorCode string `json:"code"`
 	}
 
-	return t.WriteJSON(w, status, &envelope{Error: message})
+	return t.WriteJSON(w, status, &envelope{Error: message, ErrorCode: errorCode})
 }

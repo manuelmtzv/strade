@@ -8,27 +8,119 @@ import (
 	"github.com/nicksnyder/go-i18n/v2/i18n"
 )
 
-func (t *Transporter) InternalServerError(w http.ResponseWriter, r *http.Request, err error, messageID string) {
-	t.logger.Errorw("internal error", "method", r.Method, "path", r.URL.Path, "error", err.Error())
-	msg := t.translator.GetMessageOrDefault(r.Context(), messageID, "internal server error", nil)
+type ErrorOption func(*errorConfig)
 
-	t.WriteJSONError(w, http.StatusInternalServerError, msg)
+type errorConfig struct {
+	technicalError error
+	messageID      string
+	message        string
+	templateData   map[string]any
+	errorCode      string
+}
+
+func WithTechnicalError(err error) ErrorOption {
+	return func(c *errorConfig) {
+		c.technicalError = err
+	}
+}
+
+func WithMessageID(messageID string) ErrorOption {
+	return func(c *errorConfig) {
+		c.messageID = messageID
+	}
+}
+
+func WithMessage(message string) ErrorOption {
+	return func(c *errorConfig) {
+		c.message = message
+	}
+}
+
+func WithTemplateData(data map[string]any) ErrorOption {
+	return func(c *errorConfig) {
+		c.templateData = data
+	}
+}
+
+func WithErrorCode(errorCode string) ErrorOption {
+	return func(c *errorConfig) {
+		c.errorCode = errorCode
+	}
+}
+
+func (t *Transporter) sendError(
+	w http.ResponseWriter,
+	r *http.Request,
+	status int,
+	logLevel string,
+	logMessage string,
+	defaultMessage string,
+	opts ...ErrorOption,
+) {
+	cfg := &errorConfig{}
+	for _, opt := range opts {
+		opt(cfg)
+	}
+
+	logFields := []any{"method", r.Method, "path", r.URL.Path}
+	if cfg.technicalError != nil {
+		logFields = append(logFields, "error", cfg.technicalError.Error())
+	}
+
+	switch logLevel {
+	case "error":
+		t.logger.Errorw(logMessage, logFields...)
+	case "warn":
+		t.logger.Warnw(logMessage, logFields...)
+	default:
+		t.logger.Infow(logMessage, logFields...)
+	}
+
+	userMessage := defaultMessage
+	if cfg.message != "" {
+		userMessage = cfg.message
+	} else if cfg.messageID != "" {
+		userMessage = t.translator.GetMessageOrDefault(r.Context(), cfg.messageID, defaultMessage, cfg.templateData)
+	}
+
+	errorCode := cfg.errorCode
+	if errorCode == "" {
+		errorCode = "UNKNOWN_ERROR"
+	}
+
+	t.WriteJSONError(w, status, userMessage, errorCode)
+}
+
+func (t *Transporter) InternalServerError(w http.ResponseWriter, r *http.Request, opts ...ErrorOption) {
+	t.sendError(w, r, http.StatusInternalServerError, "error", "internal server error", "internal server error", opts...)
+}
+
+func (t *Transporter) BadRequest(w http.ResponseWriter, r *http.Request, opts ...ErrorOption) {
+	t.sendError(w, r, http.StatusBadRequest, "warn", "bad request", "bad request", opts...)
+}
+
+func (t *Transporter) NotFound(w http.ResponseWriter, r *http.Request, opts ...ErrorOption) {
+	t.sendError(w, r, http.StatusNotFound, "warn", "not found", "not found", opts...)
+}
+
+func (t *Transporter) Conflict(w http.ResponseWriter, r *http.Request, opts ...ErrorOption) {
+	t.sendError(w, r, http.StatusConflict, "error", "conflict", "conflict", opts...)
+}
+
+func (t *Transporter) Unauthorized(w http.ResponseWriter, r *http.Request, opts ...ErrorOption) {
+	t.sendError(w, r, http.StatusUnauthorized, "warn", "unauthorized", "unauthorized", opts...)
+}
+
+func (t *Transporter) Forbidden(w http.ResponseWriter, r *http.Request, opts ...ErrorOption) {
+	t.sendError(w, r, http.StatusForbidden, "warn", "forbidden", "this action is forbidden", opts...)
 }
 
 func (t *Transporter) InternalServerErrorBasic(w http.ResponseWriter, r *http.Request, err error) {
-	t.InternalServerError(w, r, err, constants.ErrorInternalServerError)
-}
-
-func (t *Transporter) ForbiddenResponse(w http.ResponseWriter, r *http.Request) {
-	t.logger.Warnw("forbidden", "method", r.Method, "path", r.URL.Path)
-
-	t.WriteJSONError(w, http.StatusForbidden, t.translator.GetMessageOrDefault(r.Context(), constants.ErrorForbidden, "this action is forbidden", nil))
+	t.InternalServerError(w, r, WithTechnicalError(err), WithMessageID(constants.ErrorInternalServerError))
 }
 
 func (t *Transporter) BadRequestResponse(w http.ResponseWriter, r *http.Request, err error) {
-	t.logger.Warnw("bad request", "method", r.Method, "path", r.URL.Path, "error", err.Error())
-
-	t.WriteJSONError(w, http.StatusBadRequest, err.Error())
+	t.BadRequest(w, r, WithTechnicalError(err), WithMessage(err.Error()))
 }
 
 func (t *Transporter) ConflictResponse(w http.ResponseWriter, r *http.Request, err error) {
@@ -36,10 +128,7 @@ func (t *Transporter) ConflictResponse(w http.ResponseWriter, r *http.Request, e
 	if err != nil && localizeErr == nil {
 		msg = err.Error()
 	}
-
-	t.logger.Errorw("conflict response", "method", r.Method, "path", r.URL.Path, "error", err.Error())
-
-	t.WriteJSONError(w, http.StatusConflict, msg)
+	t.Conflict(w, r, WithTechnicalError(err), WithMessage(msg))
 }
 
 func (t *Transporter) NotFoundResponse(w http.ResponseWriter, r *http.Request, err error) {
@@ -47,29 +136,23 @@ func (t *Transporter) NotFoundResponse(w http.ResponseWriter, r *http.Request, e
 	if err != nil {
 		msg = err.Error()
 	}
-
-	t.logger.Warnw("not found", "method", r.Method, "path", r.URL.Path, "error", msg)
-
-	t.WriteJSONError(w, http.StatusNotFound, msg)
+	t.NotFound(w, r, WithTechnicalError(err), WithMessage(msg))
 }
 
 func (t *Transporter) UnauthorizedErrorResponse(w http.ResponseWriter, r *http.Request, err error) {
-	t.logger.Warnw("unauthorized", "method", r.Method, "path", r.URL.Path, "error", err.Error())
+	t.Unauthorized(w, r, WithTechnicalError(err), WithMessage(err.Error()))
+}
 
-	t.WriteJSONError(w, http.StatusUnauthorized, err.Error())
+func (t *Transporter) ForbiddenResponse(w http.ResponseWriter, r *http.Request) {
+	t.Forbidden(w, r, WithMessageID(constants.ErrorForbidden))
 }
 
 func (t *Transporter) UnauthorizedGenericErrorResponse(w http.ResponseWriter, r *http.Request, err error) {
-	t.logger.Warnw("unauthorized basic error", "method", r.Method, "path", r.URL.Path, "error", err.Error())
-
 	w.Header().Set("WWW-Authenticate", `Basic realm="restricted", charset="UTF-8"`)
-
-	t.WriteJSONError(w, http.StatusUnauthorized, t.translator.GetMessageOrDefault(r.Context(), constants.ErrorUnauthorized, "unauthorized", nil))
+	t.Unauthorized(w, r, WithTechnicalError(err), WithMessageID(constants.ErrorUnauthorized))
 }
 
 func (t *Transporter) RateLimitExceededResponse(w http.ResponseWriter, r *http.Request, retryAfter string) {
-	t.logger.Warnw("rate limit exceeded", "method", r.Method, "path", r.URL.Path)
-
 	w.Header().Set("Retry-After", retryAfter)
 
 	msg := "rate limit exceeded, retry after: " + retryAfter
@@ -80,5 +163,5 @@ func (t *Transporter) RateLimitExceededResponse(w http.ResponseWriter, r *http.R
 		})
 	}
 
-	t.WriteJSONError(w, http.StatusTooManyRequests, msg)
+	t.WriteJSONError(w, http.StatusTooManyRequests, msg, constants.ErrCodeRateLimitExceeded)
 }

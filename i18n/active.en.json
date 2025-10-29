@@ -13,5 +13,8 @@
   "Error.RateLimitExeeded": "Rate limit exceeded. Retry after {{.RetryAfter}}",
   "Error.InvalidUUID": "The identifier must be a valid UUID",
 
-  "Health.Ok": "Service is running correctly"
+  "Health.Ok": "Service is running correctly",
+
+  "Error.InvalidPostalCode": "Invalid postal code",
+  "Error.PostalCodeNotFound": "Postal code not found"
 }

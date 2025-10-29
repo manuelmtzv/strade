@@ -14,4 +14,7 @@ const (
 	ErrorInvalidPassword     = "Error.InvalidPassword"
 	ErrorRateLimitExceeded   = "Error.RateLimitExeeded"
 	ErrorInvalidUUID         = "Error.InvalidUUID"
+
+	ErrorInvalidPostalCode  = "Error.InvalidPostalCode"
+	ErrorPostalCodeNotFound = "Error.PostalCodeNotFound"
 )

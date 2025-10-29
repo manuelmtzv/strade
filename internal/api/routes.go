@@ -40,6 +40,8 @@ func NewRouter(h *handle.Handler, bundle *i18n.Bundle) http.Handler {
 
 	r.Route("/v1", func(r chi.Router) {
 		r.Get("/health", h.HandleHealthCheck)
+
+		r.Get("/postalcodes/{postalCode}", h.HandleGetPostalCodeSettlements)
 	})
 
 	return r

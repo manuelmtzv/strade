@@ -13,5 +13,8 @@
   "Error.RateLimitExeeded": "Límite de tasa excedido. Inténtalo de nuevo después de {{.RetryAfter}}",
   "Error.InvalidUUID": "El identificador debe ser un UUID válido",
 
-  "Health.Ok": "El servicio está funcionando correctamente"
+  "Health.Ok": "El servicio está funcionando correctamente",
+
+  "Error.InvalidPostalCode": "Código postal inválido",
+  "Error.PostalCodeNotFound": "Código postal no encontrado"
 }
