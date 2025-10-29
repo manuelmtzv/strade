@@ -3,12 +3,11 @@ package main
 import (
 	"database/sql"
 	"strade/internal/api"
-	"strade/internal/api/handlers"
+	"strade/internal/api/handle"
 	"strade/internal/api/transport"
 	"strade/internal/cache"
 	"strade/internal/db"
 	"strade/internal/env"
-	"strade/internal/i18n"
 	"strade/internal/store"
 	"strade/internal/translate"
 
@@ -28,8 +27,6 @@ func main() {
 	}
 
 	cfg := getConfig()
-
-	bundle := i18n.InitI18n()
 
 	dbConn, err := db.New(
 		cfg.DB.Addr,
@@ -65,17 +62,10 @@ func main() {
 	validate := validator.New(validator.WithRequiredStructEnabled())
 	transporter := transport.NewTransporter(validate, logger, defaultTranslator)
 
-	handler := &handlers.HandlerManager{
-		Config:      cfg,
-		Cache:       cacheStorage,
-		Store:       storage,
-		Translator:  defaultTranslator,
-		Transporter: transporter,
-		Logger:      logger,
-	}
+	handler := handle.NewHandler(cfg, cacheStorage, storage, defaultTranslator, transporter, logger)
 
 	app := api.NewApplication(cfg, logger)
-	app.SetRouter(api.NewRouter(handler, bundle))
+	app.SetRouter(api.NewRouter(handler))
 
 	logger.Infow("Starting server", "port", cfg.Addr)
 	if err := app.ServeHTTP(); err != nil {

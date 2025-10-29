@@ -1,4 +1,4 @@
-package handlers
+package handle
 
 import (
 	"strade/internal/api/transport"
@@ -10,7 +10,7 @@ import (
 	"go.uber.org/zap"
 )
 
-type HandlerManager struct {
+type Handler struct {
 	Config      config.APIConfig
 	Cache       cache.Storage
 	Store       store.Storage
@@ -19,8 +19,8 @@ type HandlerManager struct {
 	Logger      *zap.SugaredLogger
 }
 
-func NewHandlerManager(config config.APIConfig, cache cache.Storage, store store.Storage, translator translate.Translator, transporter *transport.Transporter, logger *zap.SugaredLogger) *HandlerManager {
-	return &HandlerManager{
+func NewHandler(config config.APIConfig, cache cache.Storage, store store.Storage, translator translate.Translator, transporter *transport.Transporter, logger *zap.SugaredLogger) *Handler {
+	return &Handler{
 		Config:      config,
 		Cache:       cache,
 		Store:       store,

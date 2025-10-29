@@ -7,12 +7,12 @@ import (
 	"golang.org/x/text/language"
 )
 
-func InitI18n() *i18n.Bundle {
-	bundle := i18n.NewBundle(language.English)
+func NewBundle() *i18n.Bundle {
+	bundle := i18n.NewBundle(language.Spanish)
 	bundle.RegisterUnmarshalFunc("json", json.Unmarshal)
 
-	bundle.MustLoadMessageFile("i18n/active.en.json")
 	bundle.MustLoadMessageFile("i18n/active.es.json")
+	bundle.MustLoadMessageFile("i18n/active.en.json")
 
 	return bundle
 }
