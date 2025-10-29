@@ -1,5 +1,5 @@
 CREATE TABLE settlements (
-    id SERIAL PRIMARY KEY,                           
+    id CHAR(9) PRIMARY KEY,
     postal_code CHAR(5) NOT NULL,                   
     name VARCHAR(100) NOT NULL,
     slug VARCHAR(100) NOT NULL,
@@ -10,11 +10,10 @@ CREATE TABLE settlements (
     office_postal_code CHAR(5),                     
     zone VARCHAR(10),                               
     latitude DOUBLE PRECISION,                      
-    longitude DOUBLE PRECISION,
-    CONSTRAINT settlements_postal_code_name_municipality_key UNIQUE (postal_code, name, municipality_id)
+    longitude DOUBLE PRECISION
 );
 
-COMMENT ON COLUMN settlements.id IS 'Unique identifier for settlement';
+COMMENT ON COLUMN settlements.id IS 'Composite key: StateCode + MunicipalityCode + SettlementID (SEPOMEX id_asenta_cpcons)';
 COMMENT ON COLUMN settlements.postal_code IS 'Postal code of the settlement';
 COMMENT ON COLUMN settlements.name IS 'Settlement name';
 COMMENT ON COLUMN settlements.slug IS 'Settlement slug';

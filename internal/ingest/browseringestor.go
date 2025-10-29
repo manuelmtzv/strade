@@ -306,31 +306,36 @@ func (s *BrowserIngestor) extractCities(rows []models.RawDataRecord) []*models.C
 
 func (s *BrowserIngestor) transformToSettlements(rows []models.RawDataRecord) []*models.Settlement {
 	settlementMap := make(map[string]*models.Settlement)
+	skippedCount := 0
 
 	for _, row := range rows {
-		if row.PostalCode == "" || row.Settlement == "" || row.MunicipalityCode == "" {
+		if row.PostalCode == "" || row.Settlement == "" || row.MunicipalityCode == "" || row.SettlementTypeCode == "" || row.SettlementID == "" {
+			skippedCount++
 			continue
 		}
 
 		cityID := strings.TrimSpace(row.CityCode)
-		if cityID == "" || row.City == "" {
+		if cityID == "" {
 			cityID = "000"
 		}
 
-		key := row.PostalCode + "|" + row.Settlement + "|" + row.MunicipalityCode
+		key := row.StateCode + row.MunicipalityCode + row.SettlementID
 
-		if _, exists := settlementMap[key]; !exists {
-			settlementMap[key] = &models.Settlement{
-				PostalCode:       row.PostalCode,
-				Name:             row.Settlement,
-				Slug:             slug.Make(row.Settlement),
-				SettlementTypeID: row.SettlementTypeCode,
-				MunicipalityID:   row.MunicipalityCode,
-				CityID:           cityID,
-				StateID:          row.StateCode,
-				OfficePostalCode: row.OfficePostalCode,
-				Zone:             row.Zone,
-			}
+		if _, exists := settlementMap[key]; exists {
+			continue
+		}
+
+		settlementMap[key] = &models.Settlement{
+			ID:               key,
+			PostalCode:       row.PostalCode,
+			Name:             row.Settlement,
+			Slug:             slug.Make(row.Settlement),
+			SettlementTypeID: row.SettlementTypeCode,
+			MunicipalityID:   row.MunicipalityCode,
+			CityID:           cityID,
+			StateID:          row.StateCode,
+			OfficePostalCode: row.OfficePostalCode,
+			Zone:             row.Zone,
 		}
 	}
 

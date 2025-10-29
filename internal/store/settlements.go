@@ -20,19 +20,22 @@ func NewSettlementStore(db *sql.DB) *SettlementStore {
 var (
 	upsertSettlementQuery = `
 		INSERT INTO settlements (
-			postal_code, name, slug, settlement_type_id, 
+			id, postal_code, name, slug, settlement_type_id, 
 			municipality_id, city_id, state_id, 
 			office_postal_code, zone
 		)
 		SELECT 
-			postal_code, name, slug, settlement_type_id,
+			id, postal_code, name, slug, settlement_type_id,
 			municipality_id, city_id, state_id,
 			office_postal_code, zone
 		FROM tmp_settlements
-		ON CONFLICT (postal_code, name, municipality_id) DO UPDATE
+		ON CONFLICT (id) DO UPDATE
 		SET 
+			postal_code = EXCLUDED.postal_code,
+			name = EXCLUDED.name,
 			slug = EXCLUDED.slug,
 			settlement_type_id = EXCLUDED.settlement_type_id,
+			municipality_id = EXCLUDED.municipality_id,
 			city_id = EXCLUDED.city_id,
 			state_id = EXCLUDED.state_id,
 			office_postal_code = EXCLUDED.office_postal_code,
@@ -63,6 +66,7 @@ func (s *SettlementStore) BulkUpsertTx(ctx context.Context, tx *sql.Tx, settleme
 
 	_, err := tx.ExecContext(ctx, `
 		CREATE TEMP TABLE tmp_settlements (
+			id CHAR(9),
 			postal_code CHAR(5),
 			name VARCHAR(100),
 			slug VARCHAR(100),
@@ -79,7 +83,7 @@ func (s *SettlementStore) BulkUpsertTx(ctx context.Context, tx *sql.Tx, settleme
 	}
 
 	stmt, err := tx.Prepare(pq.CopyIn("tmp_settlements",
-		"postal_code", "name", "slug", "settlement_type_id",
+		"id", "postal_code", "name", "slug", "settlement_type_id",
 		"municipality_id", "city_id", "state_id",
 		"office_postal_code", "zone"))
 	if err != nil {
@@ -88,7 +92,7 @@ func (s *SettlementStore) BulkUpsertTx(ctx context.Context, tx *sql.Tx, settleme
 
 	for _, st := range settlements {
 		if _, err := stmt.Exec(
-			st.PostalCode, st.Name, st.Slug, st.SettlementTypeID,
+			st.ID, st.PostalCode, st.Name, st.Slug, st.SettlementTypeID,
 			st.MunicipalityID, st.CityID, st.StateID,
 			st.OfficePostalCode, st.Zone,
 		); err != nil {
