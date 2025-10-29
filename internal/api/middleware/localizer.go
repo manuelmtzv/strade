@@ -1,7 +1,6 @@
 package middleware
 
 import (
-	"context"
 	"net/http"
 	"strade/internal/utils"
 
@@ -13,7 +12,7 @@ func Localizer(bundle *i18n.Bundle) func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			accept := r.Header.Get("Accept-Language")
 			localizer := i18n.NewLocalizer(bundle, accept)
-			ctx := context.WithValue(r.Context(), utils.LocalizerCtx, localizer)
+			ctx := utils.SetLocalizerInContext(r.Context(), localizer)
 			next.ServeHTTP(w, r.WithContext(ctx))
 		})
 	}

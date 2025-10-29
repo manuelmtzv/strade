@@ -12,8 +12,8 @@ type Storage struct {
 	WatermarkStore      *WatermarkStore
 }
 
-func NewStorage(db *sql.DB) Storage {
-	return Storage{
+func NewStorage(db *sql.DB) *Storage {
+	return &Storage{
 		DB:                  db,
 		StateStore:          NewStateStore(db),
 		MunicipalityStore:   NewMunicipalityStore(db),

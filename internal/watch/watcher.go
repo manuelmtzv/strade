@@ -16,7 +16,7 @@ type Watcher interface {
 func NewWatcher(
 	cfg config.WatcherConfig,
 	logger *zap.SugaredLogger,
-	storage store.Storage,
+	storage *store.Storage,
 	ingestor ingest.Ingestor,
 	watcherType string,
 ) Watcher {

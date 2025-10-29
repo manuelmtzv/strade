@@ -25,10 +25,10 @@ import (
 type BrowserIngestor struct {
 	config config.IngestorConfig
 	logger *zap.SugaredLogger
-	store  store.Storage
+	store  *store.Storage
 }
 
-func NewBrowserIngestor(config config.IngestorConfig, logger *zap.SugaredLogger, store store.Storage) *BrowserIngestor {
+func NewBrowserIngestor(config config.IngestorConfig, logger *zap.SugaredLogger, store *store.Storage) *BrowserIngestor {
 	return &BrowserIngestor{
 		config: config,
 		logger: logger,

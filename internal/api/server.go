@@ -13,6 +13,12 @@ import (
 	"go.uber.org/zap"
 )
 
+const (
+	DefaultWriteTimeout = 45 * time.Second
+	DefaultReadTimeout  = 20 * time.Second
+	DefaultIdleTimeout  = time.Minute
+)
+
 type Application struct {
 	Config config.APIConfig
 	Router http.Handler
@@ -34,9 +40,9 @@ func (app *Application) ServeHTTP() error {
 	server := &http.Server{
 		Addr:         app.Config.Addr,
 		Handler:      app.Router,
-		WriteTimeout: time.Second * 45,
-		ReadTimeout:  time.Second * 20,
-		IdleTimeout:  time.Minute,
+		WriteTimeout: DefaultWriteTimeout,
+		ReadTimeout:  DefaultReadTimeout,
+		IdleTimeout:  DefaultIdleTimeout,
 	}
 
 	shutdownErr := make(chan error, 1)

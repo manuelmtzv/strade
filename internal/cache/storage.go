@@ -6,8 +6,8 @@ type Storage struct {
 	client *redis.Client
 }
 
-func NewStorage(client *redis.Client) Storage {
-	return Storage{
+func NewStorage(client *redis.Client) *Storage {
+	return &Storage{
 		client: client,
 	}
 }

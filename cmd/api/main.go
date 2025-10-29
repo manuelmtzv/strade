@@ -8,6 +8,7 @@ import (
 	"strade/internal/cache"
 	"strade/internal/db"
 	"strade/internal/env"
+	"strade/internal/i18n"
 	"strade/internal/store"
 	"strade/internal/translate"
 
@@ -62,10 +63,19 @@ func main() {
 	validate := validator.New(validator.WithRequiredStructEnabled())
 	transporter := transport.NewTransporter(validate, logger, defaultTranslator)
 
-	handler := handle.NewHandler(cfg, cacheStorage, storage, defaultTranslator, transporter, logger)
+	handler := handle.NewHandler(handle.HandlerConfig{
+		Config:      cfg,
+		Cache:       cacheStorage,
+		Store:       storage,
+		Translator:  defaultTranslator,
+		Transporter: transporter,
+		Logger:      logger,
+	})
+
+	bundle := i18n.NewBundle()
 
 	app := api.NewApplication(cfg, logger)
-	app.SetRouter(api.NewRouter(handler))
+	app.SetRouter(api.NewRouter(handler, bundle))
 
 	logger.Infow("Starting server", "port", cfg.Addr)
 	if err := app.ServeHTTP(); err != nil {

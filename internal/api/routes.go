@@ -5,23 +5,27 @@ import (
 	"strade/internal/api/handle"
 	smw "strade/internal/api/middleware"
 	"strade/internal/env"
-	"strade/internal/i18n"
 	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
+	"github.com/nicksnyder/go-i18n/v2/i18n"
 )
 
-func NewRouter(h *handle.Handler) http.Handler {
+const (
+	DefaultTimeout = 60 * time.Second
+	CORSMaxAge     = 300
+)
+
+func NewRouter(h *handle.Handler, bundle *i18n.Bundle) http.Handler {
 	r := chi.NewRouter()
-	bundle := i18n.NewBundle()
 
 	r.Use(middleware.RequestID)
 	r.Use(middleware.RealIP)
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
-	r.Use(middleware.Timeout(60 * time.Second))
+	r.Use(middleware.Timeout(DefaultTimeout))
 
 	r.Use(cors.Handler(cors.Options{
 		AllowedOrigins:   env.GetSlice("CORS_ALLOWED_ORIGINS", []string{"*"}),
@@ -29,7 +33,7 @@ func NewRouter(h *handle.Handler) http.Handler {
 		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
 		ExposedHeaders:   []string{"Link"},
 		AllowCredentials: false,
-		MaxAge:           300,
+		MaxAge:           CORSMaxAge,
 	}))
 
 	r.Use(smw.Localizer(bundle))
