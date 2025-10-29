@@ -10,7 +10,7 @@ func (m *HandlerManager) HandleHealthCheck(w http.ResponseWriter, r *http.Reques
 
 	m.Logger.Info(msg)
 
-	if err := m.Transporter.JSONResponse(w, http.StatusOK, map[string]interface{}{"message": msg}); err != nil {
+	if err := m.Transporter.JSONResponse(w, http.StatusOK, map[string]any{"message": msg}); err != nil {
 		m.Transporter.InternalServerErrorBasic(w, r, err)
 	}
 }

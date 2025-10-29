@@ -11,5 +11,7 @@
   "Error.InvalidEmail": "Email inválido",
   "Error.InvalidPassword": "Contraseña inválida",
   "Error.RateLimitExeeded": "Límite de tasa excedido. Inténtalo de nuevo después de {{.RetryAfter}}",
-  "Error.InvalidUUID": "El identificador debe ser un UUID válido"
+  "Error.InvalidUUID": "El identificador debe ser un UUID válido",
+
+  "Health.Ok": "El servicio está funcionando correctamente"
 }

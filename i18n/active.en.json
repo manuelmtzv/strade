@@ -11,5 +11,7 @@
   "Error.InvalidEmail": "Invalid email",
   "Error.InvalidPassword": "Invalid password",
   "Error.RateLimitExeeded": "Rate limit exceeded. Retry after {{.RetryAfter}}",
-  "Error.InvalidUUID": "The identifier must be a valid UUID"
+  "Error.InvalidUUID": "The identifier must be a valid UUID",
+
+  "Health.Ok": "Service is running correctly"
 }

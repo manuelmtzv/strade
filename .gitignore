@@ -2,3 +2,6 @@
 /bin
 /storage
 /tmp
+
+coverage.out
+coverage.html
