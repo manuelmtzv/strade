@@ -4,6 +4,8 @@ import (
 	"strade/internal/config"
 	"strade/internal/env"
 	"time"
+
+	"go.uber.org/zap"
 )
 
 type Config struct {
@@ -11,7 +13,14 @@ type Config struct {
 	Watcher  config.WatcherConfig
 }
 
-func getConfig() Config {
+func getConfig(logger *zap.SugaredLogger) Config {
+	interval := env.GetDuration("WATCHER_INTERVAL", 6*time.Hour)
+
+	if interval < 6*time.Hour {
+		logger.Warn("Watcher interval is less than 6 hours, setting to 6 hours")
+		interval = 6 * time.Hour
+	}
+
 	return Config{
 		Ingestor: config.IngestorConfig{
 			SourceURL:            env.GetString("BROWSER_INGESTOR_SOURCE_URL", ""),
@@ -26,7 +35,7 @@ func getConfig() Config {
 		},
 		Watcher: config.WatcherConfig{
 			SourceURL: env.GetString("BROWSER_WATCHER_SOURCE_URL", ""),
-			Interval:  env.GetDuration("WATCHER_INTERVAL", 5*time.Minute),
+			Interval:  interval,
 			Jitter:    env.GetDuration("WATCHER_JITTER", 30*time.Second),
 			LockKey:   env.GetString("WATCHER_LOCK_KEY", "browser:watcher:lock"),
 			WMKey:     env.GetString("WATCHER_WM_KEY", "browser:watcher:watermark"),

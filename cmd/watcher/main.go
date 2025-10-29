@@ -25,7 +25,7 @@ func main() {
 		logger.Panicf("Failed to load env: %v", err)
 	}
 
-	cfg := getConfig()
+	cfg := getConfig(logger)
 
 	dbConn, err := db.New(
 		cfg.Ingestor.DB.Addr,
