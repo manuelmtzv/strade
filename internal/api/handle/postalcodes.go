@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strade/internal/api/transport"
 	"strade/internal/constants"
+	"strade/internal/models"
 )
 
 func (h *Handler) HandleGetPostalCodeSettlements(w http.ResponseWriter, r *http.Request) {
@@ -46,7 +47,23 @@ func (h *Handler) HandleGetPostalCodeSettlements(w http.ResponseWriter, r *http.
 		return
 	}
 
-	if err := h.Transporter.JSONResponse(w, http.StatusOK, settlements); err != nil {
+	postalCodeDetails := make([]models.PostalCodeDetails, len(settlements))
+	for i, settlement := range settlements {
+		postalCodeDetails[i] = models.PostalCodeDetails{
+			PostalCode:     *postalCode,
+			Settlement:     settlement.Name,
+			SettlementType: settlement.SettlementType.Name,
+			Municipality:   settlement.Municipality.Name,
+			State:          settlement.State.Name,
+			City:           settlement.City.Name,
+		}
+	}
+
+	metadata := models.ListMetadata{
+		Total: len(settlements),
+	}
+
+	if err := h.Transporter.JSONResponseWithMetadata(w, http.StatusOK, postalCodeDetails, metadata); err != nil {
 		h.Transporter.InternalServerError(w, r,
 			transport.WithTechnicalError(err),
 			transport.WithMessageID(constants.ErrorInternalServerError),

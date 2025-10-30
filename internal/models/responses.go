@@ -1,9 +1,14 @@
 package models
 
+type ListMetadata struct {
+	Total int `json:"total"`
+}
+
 type PostalCodeDetails struct {
-	PostalCode     string `json:"postal_code"`
-	City           string `json:"city"`
+	PostalCode     string `json:"postalCode"`
+	Settlement     string `json:"settlement"`
+	SettlementType string `json:"settlementType"`
+	Municipality   string `json:"municipality"`
 	State          string `json:"state"`
-	SettlementName string `json:"settlement_name"`
-	SettlementType string `json:"settlement_type"`
+	City           string `json:"city"`
 }
