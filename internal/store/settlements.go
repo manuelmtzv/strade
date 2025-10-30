@@ -71,8 +71,8 @@ func (s *SettlementStore) BulkUpsertTx(ctx context.Context, tx *sql.Tx, settleme
 			name VARCHAR(100),
 			slug VARCHAR(100),
 			settlement_type_id CHAR(2),
-			municipality_id CHAR(3),
-			city_id CHAR(3),
+			municipality_id CHAR(5),
+			city_id VARCHAR(10),
 			state_id CHAR(2),
 			office_postal_code CHAR(5),
 			zone VARCHAR(10)

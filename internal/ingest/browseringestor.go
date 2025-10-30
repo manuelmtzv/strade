@@ -256,9 +256,10 @@ func (s *BrowserIngestor) extractMunicipalities(rows []models.RawDataRecord) []*
 		if row.MunicipalityCode == "" || row.StateCode == "" {
 			continue
 		}
-		if _, exists := municipalityMap[row.MunicipalityCode]; !exists {
-			municipalityMap[row.MunicipalityCode] = &models.Municipality{
-				ID:      row.MunicipalityCode,
+		compositeID := row.StateCode + row.MunicipalityCode
+		if _, exists := municipalityMap[compositeID]; !exists {
+			municipalityMap[compositeID] = &models.Municipality{
+				ID:      compositeID,
 				Name:    row.Municipality,
 				Slug:    slug.Make(row.Municipality),
 				StateID: row.StateCode,
@@ -279,19 +280,21 @@ func (s *BrowserIngestor) extractCities(rows []models.RawDataRecord) []*models.C
 
 	for _, row := range rows {
 		cityCode := strings.TrimSpace(row.CityCode)
-		if cityCode == "" {
+		if cityCode == "" || row.StateCode == "" {
 			continue
 		}
 
-		if _, exists := cityMap[cityCode]; !exists {
+		compositeID := row.StateCode + cityCode
+		if _, exists := cityMap[compositeID]; !exists {
 			cityName := row.City
 			if cityName == "" {
 				cityName = "Sin nombre"
 			}
-			cityMap[cityCode] = &models.City{
-				ID:   cityCode,
-				Name: cityName,
-				Slug: slug.Make(cityName),
+			cityMap[compositeID] = &models.City{
+				ID:      compositeID,
+				Name:    cityName,
+				Slug:    slug.Make(cityName),
+				StateID: row.StateCode,
 			}
 		}
 	}
@@ -314,9 +317,10 @@ func (s *BrowserIngestor) transformToSettlements(rows []models.RawDataRecord) []
 			continue
 		}
 
-		cityID := strings.TrimSpace(row.CityCode)
-		if cityID == "" {
-			cityID = "000"
+		cityCode := strings.TrimSpace(row.CityCode)
+		cityID := "000"
+		if cityCode != "" {
+			cityID = row.StateCode + cityCode
 		}
 
 		key := row.StateCode + row.MunicipalityCode + row.SettlementID
@@ -325,13 +329,15 @@ func (s *BrowserIngestor) transformToSettlements(rows []models.RawDataRecord) []
 			continue
 		}
 
+		municipalityID := row.StateCode + row.MunicipalityCode
+
 		settlementMap[key] = &models.Settlement{
 			ID:               key,
 			PostalCode:       row.PostalCode,
 			Name:             row.Settlement,
 			Slug:             slug.Make(row.Settlement),
 			SettlementTypeID: row.SettlementTypeCode,
-			MunicipalityID:   row.MunicipalityCode,
+			MunicipalityID:   municipalityID,
 			CityID:           cityID,
 			StateID:          row.StateCode,
 			OfficePostalCode: row.OfficePostalCode,
