@@ -44,6 +44,7 @@ func NewRouter(h *handle.Handler, bundle *i18n.Bundle) http.Handler {
 		r.Get("/postalcodes/{postalCode}", h.HandleGetPostalCodeSettlements)
 
 		r.Get("/settlements", h.HandleSearchSettlements)
+		r.Get("/settlementtypes", h.HandleGetSettlementTypes)
 	})
 
 	return r

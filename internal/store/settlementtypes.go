@@ -23,6 +23,11 @@ var (
 		ON CONFLICT (id) DO UPDATE
 		SET name = EXCLUDED.name, slug = EXCLUDED.slug
 	`
+	findAllSettlementTypesQuery = `
+		SELECT id, name, slug 
+		FROM settlement_types
+		ORDER BY id ASC;
+	`
 )
 
 func (s *SettlementTypeStore) BulkUpsertTx(ctx context.Context, tx *sql.Tx, settlementTypes []*models.SettlementType) error {
@@ -46,5 +51,24 @@ func (s *SettlementTypeStore) BulkUpsertTx(ctx context.Context, tx *sql.Tx, sett
 }
 
 func (s *SettlementTypeStore) FindAll() ([]*models.SettlementType, error) {
-	return nil, nil
+	rows, err := s.db.QueryContext(context.Background(), findAllSettlementTypesQuery)
+	if err != nil {
+		return nil, fmt.Errorf("query: %w", err)
+	}
+	defer rows.Close()
+
+	var settlementTypes []*models.SettlementType
+	for rows.Next() {
+		var st models.SettlementType
+		if err := rows.Scan(
+			&st.ID,
+			&st.Name,
+			&st.Slug,
+		); err != nil {
+			return nil, fmt.Errorf("scan row: %w", err)
+		}
+		settlementTypes = append(settlementTypes, &st)
+	}
+
+	return settlementTypes, nil
 }

@@ -22,3 +22,9 @@ type SettlementSearchResult struct {
 	State          string `json:"state"`
 	City           string `json:"city"`
 }
+
+type SettlementTypeResponse struct {
+	ID   string `json:"id"`
+	Name string `json:"name"`
+	Slug string `json:"slug"`
+}

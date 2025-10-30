@@ -70,7 +70,7 @@ var (
         LEFT JOIN municipalities m ON s.municipality_id = m.id
         LEFT JOIN cities c ON s.city_id = c.id
         LEFT JOIN states st ON s.state_id = st.id
-        WHERE s.name ILIKE $1
+        WHERE (s.name ILIKE $1 OR s.slug ILIKE $1) 
         LIMIT $2
 	`
 )
