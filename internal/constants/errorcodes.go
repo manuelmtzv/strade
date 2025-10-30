@@ -18,4 +18,6 @@ const (
 
 	ErrCodeInvalidPostalCode  = "INVALID_POSTAL_CODE"
 	ErrCodePostalCodeNotFound = "POSTAL_CODE_NOT_FOUND"
+
+	ErrCodeInvalidQuery = "INVALID_QUERY"
 )

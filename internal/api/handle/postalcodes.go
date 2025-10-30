@@ -10,15 +10,7 @@ import (
 )
 
 func (h *Handler) HandleGetPostalCodeSettlements(w http.ResponseWriter, r *http.Request) {
-	postalCode, err := h.Transporter.GetUrlParam(r, "postalCode")
-	if err != nil {
-		h.Transporter.InternalServerError(w, r,
-			transport.WithTechnicalError(fmt.Errorf("error getting url param: %w", err)),
-			transport.WithMessageID(constants.ErrorInternalServerError),
-			transport.WithErrorCode(constants.ErrCodeInternalServerError),
-		)
-		return
-	}
+	postalCode, _ := h.Transporter.GetUrlParam(r, "postalCode")
 
 	if postalCode == nil || *postalCode == "" {
 		h.Transporter.BadRequest(w, r,

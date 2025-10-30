@@ -30,4 +30,5 @@ type SettlementStorage interface {
 	BulkUpsertTx(ctx context.Context, tx *sql.Tx, settlements []*models.Settlement) error
 	FindAll() ([]*models.Settlement, error)
 	FindByPostalCode(ctx context.Context, postalCode string) ([]*models.Settlement, error)
+	SearchByName(ctx context.Context, name string, limit int) ([]*models.Settlement, error)
 }

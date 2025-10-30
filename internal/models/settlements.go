@@ -21,6 +21,4 @@ type Settlement struct {
 	State            *State          `json:"state"`
 	OfficePostalCode string          `json:"officePostalCode"`
 	Zone             string          `json:"zone"`
-	Latitude         *float64        `json:"latitude,omitempty"`
-	Longitude        *float64        `json:"longitude,omitempty"`
 }

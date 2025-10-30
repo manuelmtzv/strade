@@ -8,9 +8,7 @@ CREATE TABLE settlements (
     city_id VARCHAR(10) NOT NULL REFERENCES cities(id),                     
     state_id CHAR(2) NOT NULL REFERENCES states(id),                     
     office_postal_code CHAR(5),                     
-    zone VARCHAR(10),                               
-    latitude DOUBLE PRECISION,                      
-    longitude DOUBLE PRECISION
+    zone VARCHAR(10)
 );
 
 COMMENT ON COLUMN settlements.id IS 'Composite key: StateCode + MunicipalityCode + SettlementID (SEPOMEX id_asenta_cpcons)';
@@ -23,8 +21,6 @@ COMMENT ON COLUMN settlements.city_id IS 'Reference to city';
 COMMENT ON COLUMN settlements.state_id IS 'Reference to state';
 COMMENT ON COLUMN settlements.office_postal_code IS 'Postal code of post office that serves this settlement';
 COMMENT ON COLUMN settlements.zone IS 'Urban or Rural zone';
-COMMENT ON COLUMN settlements.latitude IS 'Latitude for geocoding';
-COMMENT ON COLUMN settlements.longitude IS 'Longitude for geocoding';
 
 CREATE INDEX idx_settlements_postal_code ON settlements(postal_code);
 CREATE INDEX idx_settlements_name ON settlements(name);

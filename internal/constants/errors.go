@@ -17,4 +17,6 @@ const (
 
 	ErrorInvalidPostalCode  = "Error.InvalidPostalCode"
 	ErrorPostalCodeNotFound = "Error.PostalCodeNotFound"
+
+	ErrorInvalidQuery = "Error.InvalidQuery"
 )

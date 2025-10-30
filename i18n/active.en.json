@@ -16,5 +16,7 @@
   "Health.Ok": "Service is running correctly",
 
   "Error.InvalidPostalCode": "Invalid postal code",
-  "Error.PostalCodeNotFound": "Postal code not found"
+  "Error.PostalCodeNotFound": "Postal code not found",
+
+  "Error.InvalidQuery": "Invalid query"
 }

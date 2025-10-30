@@ -41,7 +41,7 @@ var (
 			office_postal_code = EXCLUDED.office_postal_code,
 			zone = EXCLUDED.zone;
 	`
-	FindByPostalCodeQuery = `
+	findSettlementByPostalCodeQuery = `
 		SELECT
 			s.id,
 			s.postal_code, s.name, s.slug,
@@ -56,6 +56,22 @@ var (
 		LEFT JOIN cities c ON s.city_id = c.id
 		LEFT JOIN states st ON s.state_id = st.id
 		WHERE postal_code = $1;
+	`
+	searchSettlementByNameQuery = `
+		SELECT 
+            s.id, s.postal_code, s.name, s.slug,
+            s.office_postal_code, s.zone,
+            stt.id, stt.name, stt.slug,
+            m.id, m.name, m.slug,
+            c.id, c.name, c.slug,
+            st.id, st.name, st.slug
+        FROM settlements s
+        LEFT JOIN settlement_types stt ON s.settlement_type_id = stt.id
+        LEFT JOIN municipalities m ON s.municipality_id = m.id
+        LEFT JOIN cities c ON s.city_id = c.id
+        LEFT JOIN states st ON s.state_id = st.id
+        WHERE s.name ILIKE $1
+        LIMIT $2
 	`
 )
 
@@ -121,7 +137,50 @@ func (s *SettlementStore) FindAll() ([]*models.Settlement, error) {
 }
 
 func (s *SettlementStore) FindByPostalCode(ctx context.Context, postalCode string) ([]*models.Settlement, error) {
-	rows, err := s.db.QueryContext(ctx, FindByPostalCodeQuery, postalCode)
+	rows, err := s.db.QueryContext(ctx, findSettlementByPostalCodeQuery, postalCode)
+	if err != nil {
+		return nil, fmt.Errorf("query: %w", err)
+	}
+	defer rows.Close()
+
+	var settlements []*models.Settlement
+	for rows.Next() {
+		var st models.Settlement
+		st.SettlementType = &models.SettlementType{}
+		st.Municipality = &models.Municipality{}
+		st.City = &models.City{}
+		st.State = &models.State{}
+
+		if err := rows.Scan(
+			&st.ID,
+			&st.PostalCode,
+			&st.Name,
+			&st.Slug,
+			&st.OfficePostalCode,
+			&st.Zone,
+			&st.SettlementType.ID,
+			&st.SettlementType.Name,
+			&st.SettlementType.Slug,
+			&st.Municipality.ID,
+			&st.Municipality.Name,
+			&st.Municipality.Slug,
+			&st.City.ID,
+			&st.City.Name,
+			&st.City.Slug,
+			&st.State.ID,
+			&st.State.Name,
+			&st.State.Slug,
+		); err != nil {
+			return nil, fmt.Errorf("scan row: %w", err)
+		}
+		settlements = append(settlements, &st)
+	}
+
+	return settlements, nil
+}
+
+func (s *SettlementStore) SearchByName(ctx context.Context, name string, limit int) ([]*models.Settlement, error) {
+	rows, err := s.db.QueryContext(ctx, searchSettlementByNameQuery, name, limit)
 	if err != nil {
 		return nil, fmt.Errorf("query: %w", err)
 	}
