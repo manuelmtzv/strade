@@ -1,0 +1,16 @@
+services:
+  db:
+    ports:
+      - "5432:5432"
+
+  redis:
+    ports:
+      - "6379:6379"
+
+  api:
+    ports:
+      - "8080:8080"
+
+  watcher:
+    ports:
+      - "8081:8081"

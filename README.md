@@ -19,3 +19,128 @@ Dicha distribución no implica su venta ni su redistribución con fines de lucro
 
 Cualquier uso de este proyecto que implique redistribución, modificación o monetización de los datos deberá respetar las restricciones establecidas por SEPOMEX.  
 El mantenimiento, alojamiento o servicios derivados ofrecidos a través de **Strade** se limitan a proveer infraestructura y funcionalidad adicional, sin alterar la naturaleza gratuita de los datos originales.
+
+## Desarrollo con Docker
+
+El proyecto utiliza Docker Compose para gestionar los servicios necesarios en desarrollo y producción.
+
+### Estructura
+
+```
+docker/
+├── Dockerfile.api          # Multi-stage build para API
+├── Dockerfile.watcher      # Multi-stage build para Watcher
+├── docker-compose.yml      # Configuración de producción
+├── docker-compose.dev.yml  # Configuración de desarrollo
+└── entrypoint.sh          # Script de inicialización y migraciones
+```
+
+### Configuración Inicial
+
+Copiar el archivo de ejemplo y configurar variables de entorno:
+
+```bash
+cp .env.example .env.dev
+```
+
+Editar `.env.dev` con los valores apropiados. Para desarrollo con Docker, asegurar:
+
+```bash
+# Database (usar 'db' como host dentro de Docker)
+DB_ADDR=postgres://postgres:password@db:5432/strade-db?sslmode=disable
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=password
+POSTGRES_DB=strade-db
+
+# Redis (usar 'redis' como host dentro de Docker)
+REDIS_ADDR=redis:6379
+REDIS_PW=
+REDIS_PASSWORD=
+```
+
+### Comandos Disponibles
+
+Desarrollo:
+
+```bash
+# Iniciar solo DB y Redis (para desarrollo local de Go)
+make docker-dev-up
+
+# Iniciar stack completo (DB, Redis, API, Watcher)
+make docker-dev-full-up
+
+# Detener servicios
+make docker-dev-down
+
+# Ver logs en tiempo real
+make docker-dev-logs
+```
+
+Producción:
+
+```bash
+# Iniciar stack completo
+make docker-up
+
+# Detener servicios
+make docker-down
+
+# Ver logs
+make docker-logs
+
+# Limpiar todo (incluyendo volúmenes)
+make docker-clean
+```
+
+### Servicios
+
+- **PostgreSQL** - Base de datos principal (puerto 5432 en dev, interno en prod)
+- **Redis** - Cache y message broker (puerto 6379 en dev, interno en prod)
+- **API** - Servidor HTTP (puerto 8080)
+- **Watcher** - Servicio de monitoreo y sincronización (puerto 8081)
+
+### Migraciones
+
+Las migraciones de base de datos se ejecutan automáticamente al iniciar los contenedores mediante `entrypoint.sh`. Si las migraciones fallan, el contenedor no iniciará.
+
+Para ejecutar migraciones manualmente:
+
+```bash
+# Aplicar migraciones pendientes
+make migrate
+
+# Revertir última migración
+make migrate-down
+
+# Resetear base de datos (drop + up)
+make migrate-reset
+
+# Crear nueva migración
+make create-migration nombre_migracion
+```
+
+### Arquitectura Docker
+
+Desarrollo:
+- Restart policy: `no` (facilita debugging)
+- Puertos expuestos: DB y Redis accesibles desde host
+- Redis sin autenticación
+- Resource limits reducidos
+
+Producción:
+- Restart policy: `unless-stopped` (alta disponibilidad)
+- Puertos internos: DB y Redis solo accesibles dentro de red Docker
+- Redis con autenticación requerida
+- Resource limits definidos por servicio
+- Multi-stage builds para imágenes optimizadas
+
+Todos los servicios se comunican a través de una red Docker aislada llamada `backend`.
+
+### Seguridad
+
+En producción:
+- Base de datos y Redis no exponen puertos al host
+- Redis requiere autenticación mediante `REDIS_PASSWORD`
+- Imágenes multi-stage reducen superficie de ataque
+- Health checks configurados para todos los servicios
+- Resource limits previenen consumo excesivo de recursos
