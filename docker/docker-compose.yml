@@ -15,11 +15,11 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '2'
-          memory: 1G
+          cpus: "${DB_CPUS_LIMIT:-2}"
+          memory: "${DB_MEMORY_LIMIT:-1G}"
         reservations:
-          cpus: '1'
-          memory: 512M
+          cpus: "${DB_CPUS_RESERVE:-1}"
+          memory: "${DB_MEMORY_RESERVE:-512M}"
     networks:
       - backend
 
@@ -43,11 +43,11 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '2'
-          memory: 1G
+          cpus: "${API_CPUS_LIMIT:-2}"
+          memory: "${API_MEMORY_LIMIT:-1G}"
         reservations:
-          cpus: '1'
-          memory: 512M
+          cpus: "${API_CPUS_RESERVE:-1}"
+          memory: "${API_MEMORY_RESERVE:-512M}"
     networks:
       - backend
 
@@ -71,11 +71,11 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '4'
-          memory: 2G
+          cpus: "${WATCHER_CPUS_LIMIT:-4}"
+          memory: "${WATCHER_MEMORY_LIMIT:-2G}"
         reservations:
-          cpus: '2'
-          memory: 1G
+          cpus: "${WATCHER_CPUS_RESERVE:-2}"
+          memory: "${WATCHER_MEMORY_RESERVE:-1G}"
     networks:
       - backend
 
@@ -94,11 +94,11 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '1'
-          memory: 512M
+          cpus: "${REDIS_CPUS_LIMIT:-1}"
+          memory: "${REDIS_MEMORY_LIMIT:-512M}"
         reservations:
-          cpus: '0.5'
-          memory: 256M
+          cpus: "${REDIS_CPUS_RESERVE:-0.5}"
+          memory: "${REDIS_MEMORY_RESERVE:-256M}"
     networks:
       - backend
 
