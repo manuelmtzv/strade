@@ -45,6 +45,71 @@ func (s *StateStore) BulkUpsertTx(ctx context.Context, tx *sql.Tx, states []*mod
 	return err
 }
 
-func (s *StateStore) FindAll() ([]*models.State, error) {
-	return nil, nil
+const (
+	findAllStatesQuery = `
+		SELECT id, name, slug 
+		FROM states
+		ORDER BY name ASC
+	`
+	findMunicipalitiesByStateIDQuery = `
+		SELECT id, name, slug, state_id
+		FROM municipalities 
+		WHERE state_id = $1
+		ORDER BY name ASC
+	`
+)
+
+func (s *StateStore) FindAll(ctx context.Context) ([]*models.State, error) {
+	rows, err := s.db.QueryContext(ctx, findAllStatesQuery)
+	if err != nil {
+		return nil, fmt.Errorf("query: %w", err)
+	}
+	defer rows.Close()
+
+	var states []*models.State
+	for rows.Next() {
+		var state models.State
+		if err := rows.Scan(
+			&state.ID,
+			&state.Name,
+			&state.Slug,
+		); err != nil {
+			return nil, fmt.Errorf("scan row: %w", err)
+		}
+		states = append(states, &state)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, fmt.Errorf("rows error: %w", err)
+	}
+
+	return states, nil
+}
+
+func (s *StateStore) FindMunicipalitiesByStateID(ctx context.Context, stateID string) ([]*models.Municipality, error) {
+	rows, err := s.db.QueryContext(ctx, findMunicipalitiesByStateIDQuery, stateID)
+	if err != nil {
+		return nil, fmt.Errorf("query: %w", err)
+	}
+	defer rows.Close()
+
+	var municipalities []*models.Municipality
+	for rows.Next() {
+		var m models.Municipality
+		if err := rows.Scan(
+			&m.ID,
+			&m.Name,
+			&m.Slug,
+			&m.StateID,
+		); err != nil {
+			return nil, fmt.Errorf("scan row: %w", err)
+		}
+		municipalities = append(municipalities, &m)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, fmt.Errorf("rows error: %w", err)
+	}
+
+	return municipalities, nil
 }

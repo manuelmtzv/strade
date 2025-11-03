@@ -99,6 +99,16 @@ make docker-clean
 - **API** - Servidor HTTP (puerto 8080)
 - **Watcher** - Servicio de monitoreo y sincronización (puerto 8081)
 
+## Documentación de la API
+
+La documentación completa de la API está disponible en formato OpenAPI (Swagger) en la siguiente ruta cuando el servidor está en ejecución:
+
+```
+http://localhost:8080/docs
+```
+
+Para acceder a la documentación, asegúrate de que el servicio de la API esté en ejecución. La documentación incluye todos los endpoints disponibles, sus parámetros, formatos de solicitud y ejemplos de respuestas.
+
 ### Migraciones
 
 Las migraciones de base de datos se ejecutan automáticamente al iniciar los contenedores mediante `entrypoint.sh`. Si las migraciones fallan, el contenedor no iniciará.

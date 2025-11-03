@@ -1,0 +1,162 @@
+basePath: /v1
+definitions:
+  models.MunicipalitiesResponse:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/models.Municipality'
+        type: array
+    type: object
+  models.Municipality:
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+      slug:
+        type: string
+      state:
+        $ref: '#/definitions/models.State'
+      stateId:
+        type: string
+    type: object
+  models.PostalCodeDetails:
+    properties:
+      city:
+        type: string
+      municipality:
+        type: string
+      postalCode:
+        type: string
+      settlement:
+        type: string
+      settlementType:
+        type: string
+      state:
+        type: string
+    type: object
+  models.PostalCodeDetailsResponse:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/models.PostalCodeDetails'
+        type: array
+    type: object
+  models.State:
+    properties:
+      id:
+        type: string
+      name:
+        type: string
+      slug:
+        type: string
+    type: object
+  models.StatesResponse:
+    properties:
+      data:
+        items:
+          $ref: '#/definitions/models.State'
+        type: array
+    type: object
+  transport.ErrorDetail:
+    properties:
+      code:
+        type: string
+      details:
+        type: string
+      message:
+        type: string
+    type: object
+  transport.ErrorResponse:
+    properties:
+      error:
+        $ref: '#/definitions/transport.ErrorDetail'
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: This is the Strade API documentation.
+  license:
+    name: Apache 2.0
+    url: http://www.apache.org/licenses/LICENSE-2.0.html
+  title: Strade API
+  version: "1.0"
+paths:
+  /v1/postalcodes/{postalCode}:
+    get:
+      consumes:
+      - application/json
+      description: Get a list of settlements for a specific postal code
+      parameters:
+      - description: Postal Code
+        in: path
+        name: postalCode
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.PostalCodeDetailsResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/transport.ErrorResponse'
+      summary: Get settlements by postal code
+      tags:
+      - PostalCodes
+  /v1/states:
+    get:
+      consumes:
+      - application/json
+      description: Get a list of all states
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.StatesResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/transport.ErrorResponse'
+      summary: Get all states
+      tags:
+      - States
+  /v1/states/{stateId}/municipalities:
+    get:
+      consumes:
+      - application/json
+      description: Get a list of municipalities for a specific state
+      parameters:
+      - description: State ID
+        in: path
+        name: stateId
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/models.MunicipalitiesResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/transport.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/transport.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/transport.ErrorResponse'
+      summary: Get municipalities by state
+      tags:
+      - States
+swagger: "2.0"

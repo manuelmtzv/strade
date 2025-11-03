@@ -11,6 +11,7 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
 	"github.com/nicksnyder/go-i18n/v2/i18n"
+	httpSwagger "github.com/swaggo/http-swagger"
 )
 
 const (
@@ -38,6 +39,16 @@ func NewRouter(h *handle.Handler, bundle *i18n.Bundle) http.Handler {
 
 	r.Use(smw.Localizer(bundle))
 
+	r.Get("/docs", func(w http.ResponseWriter, r *http.Request) {
+		http.Redirect(w, r, "/swagger/index.html", http.StatusMovedPermanently)
+	})
+
+	r.Get("/swagger/*", httpSwagger.Handler(
+		httpSwagger.URL("/swagger/doc.json"),
+		httpSwagger.DocExpansion("none"),
+		httpSwagger.DomID("swagger-ui"),
+	))
+
 	r.Route("/v1", func(r chi.Router) {
 		r.Get("/health", h.HandleHealthCheck)
 
@@ -45,6 +56,11 @@ func NewRouter(h *handle.Handler, bundle *i18n.Bundle) http.Handler {
 
 		r.Get("/settlements", h.HandleSearchSettlements)
 		r.Get("/settlementtypes", h.HandleGetSettlementTypes)
+
+		r.Route("/states", func(r chi.Router) {
+			r.Get("/", h.HandleGetStates)
+			r.Get("/{stateId}/municipalities", h.HandleGetStateMunicipalities)
+		})
 	})
 
 	return r

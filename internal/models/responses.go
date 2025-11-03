@@ -28,3 +28,15 @@ type SettlementTypeResponse struct {
 	Name string `json:"name"`
 	Slug string `json:"slug"`
 }
+
+type StatesResponse struct {
+	Data []*State `json:"data"`
+}
+
+type MunicipalitiesResponse struct {
+	Data []*Municipality `json:"data"`
+}
+
+type PostalCodeDetailsResponse struct {
+	Data []*PostalCodeDetails `json:"data"`
+}

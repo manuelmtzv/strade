@@ -9,6 +9,15 @@ import (
 	"strade/internal/models"
 )
 
+// @Summary Get settlements by postal code
+// @Description Get a list of settlements for a specific postal code
+// @Tags PostalCodes
+// @Accept json
+// @Produce json
+// @Param postalCode path string true "Postal Code"
+// @Success 200 {object} models.PostalCodeDetailsResponse
+// @Failure 500 {object} transport.ErrorResponse
+// @Router /v1/postalcodes/{postalCode} [get]
 func (h *Handler) HandleGetPostalCodeSettlements(w http.ResponseWriter, r *http.Request) {
 	postalCode, _ := h.Transporter.GetUrlParam(r, "postalCode")
 

@@ -8,7 +8,8 @@ import (
 
 type StateStorage interface {
 	BulkUpsertTx(ctx context.Context, tx *sql.Tx, states []*models.State) error
-	FindAll() ([]*models.State, error)
+	FindAll(ctx context.Context) ([]*models.State, error)
+	FindMunicipalitiesByStateID(ctx context.Context, stateID string) ([]*models.Municipality, error)
 }
 
 type MunicipalityStorage interface {

@@ -38,38 +38,44 @@ shift-migrations:
 .PHONY: docker-dev-up
 docker-dev-up:
 	@echo "Starting development environment (db + redis only)..."
-	@docker-compose -f docker/docker-compose.dev.yml up -d db redis
+	@docker compose -f docker/docker-compose.dev.yml up -d db redis
 
 .PHONY: docker-dev-full-up
 docker-dev-full-up:
 	@echo "Starting full development environment (db + redis + api + watcher)..."
-	@docker-compose -f docker/docker-compose.dev.yml up -d
+	@docker compose -f docker/docker-compose.dev.yml up -d
 
 .PHONY: docker-dev-down
 docker-dev-down:
 	@echo "Stopping development environment..."
-	@docker-compose -f docker/docker-compose.dev.yml down
+	@docker compose -f docker/docker-compose.dev.yml down
 
 .PHONY: docker-dev-logs
 docker-dev-logs:
-	@docker-compose -f docker/docker-compose.dev.yml logs -f
+	@docker compose -f docker/docker-compose.dev.yml logs -f
 
 .PHONY: docker-up
 docker-up:
 	@echo "Starting full environment (db + redis + api + watcher)..."
-	@docker-compose -f docker/docker-compose.yml up -d
+	@docker compose -f docker/docker-compose.yml up -d
 
 .PHONY: docker-down
 docker-down:
 	@echo "Stopping full environment..."
-	@docker-compose -f docker/docker-compose.yml down
+	@docker compose -f docker/docker-compose.yml down
 
 .PHONY: docker-logs
 docker-logs:
-	@docker-compose -f docker/docker-compose.yml logs -f
+	@docker compose -f docker/docker-compose.yml logs -f
 
 .PHONY: docker-clean
 docker-clean:
 	@echo "Cleaning up all Docker resources..."
-	@docker-compose -f docker/docker-compose.yml down -v
-	@docker-compose -f docker/docker-compose.dev.yml down -v
+	@docker compose -f docker/docker-compose.yml down -v
+	@docker compose -f docker/docker-compose.dev.yml down -v
+
+.PHONY: docs
+docs:
+	@echo "Generating Swagger documentation..."
+	@swag init -g ./cmd/api/main.go -o ./docs
+
