@@ -2,27 +2,31 @@ FROM golang:1.25.3 as builder
 
 WORKDIR /app
 
+RUN go install github.com/swaggo/swag/cmd/swag@latest
+RUN go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
+
 COPY go.mod go.sum ./
 RUN go mod download
 
-RUN go install -tags 'postgres' github.com/golang-migrate/migrate/v4/cmd/migrate@latest
-
 COPY . .
+
+RUN swag init -g ./cmd/api/main.go -o ./docs
 
 RUN CGO_ENABLED=0 GOOS=linux go build -o /app/main ./cmd/api
 
 FROM alpine:latest
 
-RUN apk --no-cache add ca-certificates tzdata
+RUN apk --no-cache add ca-certificates tzdata libc6-compat
 
 WORKDIR /app
 
 COPY --from=builder /app/main /app/main
 COPY --from=builder /go/bin/migrate /usr/local/bin/migrate
 COPY --from=builder /app/cmd/migrate/migrations /app/cmd/migrate/migrations
-COPY docker/entrypoint.sh /app/entrypoint.sh
+COPY --from=builder /app/i18n /app/i18n
+COPY --from=builder /app/docker/entrypoint.sh /app/entrypoint.sh
 
-RUN chmod +x /app/entrypoint.sh
+RUN chmod +x /app/entrypoint.sh /usr/local/bin/migrate
 
 EXPOSE 8080
 

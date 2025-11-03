@@ -7,6 +7,14 @@ import (
 	"strade/internal/models"
 )
 
+// @Summary Get settlement types
+// @Description Get a list of settlement types
+// @Tags SettlementTypes
+// @Accept json
+// @Produce json
+// @Success 200 {object} models.SettlementType
+// @Failure 500 {object} transport.ErrorResponse
+// @Router /settlementtypes [get]
 func (h *Handler) HandleGetSettlementTypes(w http.ResponseWriter, r *http.Request) {
 	settlementTypes, err := h.Store.SettlementTypeStore.FindAll()
 	if err != nil {

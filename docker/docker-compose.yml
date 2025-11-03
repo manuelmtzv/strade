@@ -29,6 +29,8 @@ services:
       dockerfile: docker/Dockerfile.api
     container_name: strade-api
     restart: unless-stopped
+    environment:
+      - ENVIRONMENT=PRODUCTION
     env_file:
       - ../.env
     ports:
@@ -55,6 +57,8 @@ services:
       dockerfile: docker/Dockerfile.watcher
     container_name: strade-watcher
     restart: unless-stopped
+    environment:
+      - ENVIRONMENT=PRODUCTION
     env_file:
       - ../.env
     ports:

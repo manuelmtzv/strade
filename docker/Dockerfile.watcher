@@ -20,7 +20,7 @@ COPY --from=builder /app/docker/entrypoint.sh /app/entrypoint.sh
 
 WORKDIR /app
 
-RUN chmod +x /app/entrypoint.sh
+RUN chmod +x /app/entrypoint.sh /usr/local/bin/migrate
 
 EXPOSE 8081
 

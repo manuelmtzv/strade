@@ -9,6 +9,16 @@ import (
 	"strade/internal/utils"
 )
 
+// @Summary Search settlements
+// @Description Search settlements by name
+// @Tags Settlements
+// @Accept json
+// @Produce json
+// @Param q query string true "Search Query"
+// @Param limit query int false "Limit"
+// @Success 200 {object} models.SettlementSearchResult
+// @Failure 500 {object} transport.ErrorResponse
+// @Router /settlements [get]
 func (h *Handler) HandleSearchSettlements(w http.ResponseWriter, r *http.Request) {
 	query, _ := h.Transporter.GetSearchParam(r, "q")
 	if query == nil || *query == "" {

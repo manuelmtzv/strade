@@ -26,7 +26,9 @@ vendor
 # Docker files
 Dockerfile*
 docker-compose*.yml
-docker/
+docker/Dockerfile*
+docker/docker-compose*.yml
+docker/compose*.yml
 
 # Git
 .git

@@ -15,7 +15,7 @@ import (
 // @Produce json
 // @Success 200 {object} models.StatesResponse
 // @Failure 500 {object} transport.ErrorResponse
-// @Router /v1/states [get]
+// @Router /states [get]
 func (h *Handler) HandleGetStates(w http.ResponseWriter, r *http.Request) {
 	ctx := r.Context()
 	states, err := h.Store.StateStore.FindAll(ctx)
@@ -41,7 +41,7 @@ func (h *Handler) HandleGetStates(w http.ResponseWriter, r *http.Request) {
 // @Failure 400 {object} transport.ErrorResponse
 // @Failure 404 {object} transport.ErrorResponse
 // @Failure 500 {object} transport.ErrorResponse
-// @Router /v1/states/{stateId}/municipalities [get]
+// @Router /states/{stateId}/municipalities [get]
 func (h *Handler) HandleGetStateMunicipalities(w http.ResponseWriter, r *http.Request) {
 	stateID := chi.URLParam(r, "stateId")
 	if stateID == "" {
