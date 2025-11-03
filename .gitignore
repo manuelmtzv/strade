@@ -1,4 +1,5 @@
 .env
+.env.dev
 /bin
 /storage
 /tmp
