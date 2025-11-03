@@ -12,11 +12,11 @@ import (
 func Load() error {
 	environment := GetString("ENVIRONMENT", "")
 
-	if environment != "PRODUCTION" {
-		return godotenv.Load()
+	if environment == "PRODUCTION" {
+		return godotenv.Load(".env")
 	}
 
-	return nil
+	return godotenv.Load(".env.dev")
 }
 
 func GetString(key, fallback string) string {
