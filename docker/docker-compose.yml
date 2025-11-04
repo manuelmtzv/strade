@@ -61,9 +61,9 @@ services:
     restart: unless-stopped
     env_file:
       - ../.env
-    command: redis-server --save 60 1 --loglevel warning --requirepass ${REDIS_PASSWORD}
+    command: sh -c "redis-server --save 60 1 --loglevel warning --requirepass $$REDIS_PASSWORD"
     healthcheck:
-      test: ["CMD", "redis-cli", "--no-auth-warning", "-a", "${REDIS_PASSWORD}", "ping"]
+      test: ["CMD", "sh", "-c", "redis-cli --no-auth-warning -a $$REDIS_PASSWORD ping"]
       interval: 10s
       timeout: 5s
       retries: 5
