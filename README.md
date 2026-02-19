@@ -58,6 +58,27 @@ REDIS_PW=
 REDIS_PASSWORD=
 ```
 
+
+### Arranque rápido (portable para nuevos servidores)
+
+Para reducir fricción al clonar y levantar el proyecto en otra máquina:
+
+```bash
+make bootstrap
+make docker-up
+```
+
+El target `bootstrap` crea `.env` y `.env.dev` desde `.env.example` si no existen y genera un `REDIS_PASSWORD` para producción cuando está vacío.
+
+Prerrequisitos mínimos recomendados:
+- Docker Engine + Docker Compose plugin
+- GNU Make
+
+Tip para despliegues reproducibles:
+- Mantener tu archivo `.env` fuera del repositorio y versionar solo plantillas (`.env.example`).
+- Fijar versiones de imágenes (ya se usan tags explícitos en PostgreSQL y Redis).
+- Ejecutar siempre el stack con Compose (`make docker-up`) para evitar diferencias entre servidores.
+
 ### Comandos Disponibles
 
 Desarrollo:

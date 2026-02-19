@@ -35,6 +35,10 @@ migrate-reset:
 shift-migrations:
 	@./scripts/shiftmigrations.sh $(filter-out $@,$(MAKECMDGOALS))
 
+.PHONY: bootstrap
+bootstrap:
+	@./scripts/bootstrap.sh
+
 .PHONY: docker-dev-up
 docker-dev-up:
 	@echo "Starting development environment (db + redis only)..."
